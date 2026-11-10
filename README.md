@@ -12,7 +12,7 @@ UI test automation framework for the [SauceDemo](https://www.saucedemo.com) prac
 | Cart | Add, add multiple, remove (from inventory and cart pages), continue shopping |
 | Checkout | End-to-end order, form validation (first name, last name, postal code), total = subtotal + tax, cancel |
 | Known issues | Intentionally broken demo users (`problem_user`, `performance_glitch_user`) documented with xfail tests and bug reports |
-| Performance | Locust load script for the Restful-Booker API (`performance/`) |
+| Performance | Login response-time check (under 2 s) in the UI suite, plus a separate Locust load script for the Restful-Booker practice API (`performance/`) |
 | CI | GitHub Actions: smoke job first, then full regression; HTML report, screenshots and traces uploaded as artifacts |
 
 ## Design
@@ -20,6 +20,7 @@ UI test automation framework for the [SauceDemo](https://www.saucedemo.com) prac
 - **Page Object Model** (`pages/`): one class per page (`LoginPage`, `InventoryPage`, `CartPage`, `CheckoutPage`) so locators live in one place.
 - **Fixtures** (`tests/conftest.py`): `inventory` logs in and lands on the products page; page objects are injected into tests.
 - **Stable locators**: `data-test` attributes instead of CSS classes.
+- **Reliable waits**: assertions use Playwright's auto-waiting `expect(...)`, so tests don't depend on timing and stay stable on slower CI machines.
 - **Markers**: `smoke`, `regression`, `negative`, `known_issue`.
 - **Evidence on failure**: screenshots and Playwright traces (`test-results/`), plus a self-contained HTML report (`reports/report.html`).
 
@@ -65,7 +66,9 @@ Keep the load small; the target is a shared public practice API.
 
 ## Known issues
 
-The `problem_user` and `performance_glitch_user` accounts are broken on purpose. Tests for them in `tests/test_known_issues.py` assert the correct behaviour and are marked `xfail`. Write-ups are in [`bug-reports/`](bug-reports/).
+The `problem_user` and `performance_glitch_user` accounts are broken on purpose. Tests for them in `tests/test_known_issues.py` assert the correct behaviour and are marked `xfail`. Write-ups with screenshots and measured timings are in [`bug-reports/`](bug-reports/).
+
+BUG-003 (slow login) is environment-dependent: about 5.4 s on a local machine but 0.10 s on GitHub Actions, so its test is non-strict and may show as XPASS in CI.
 
 ## Test execution report
 
@@ -77,14 +80,5 @@ The `problem_user` and `performance_glitch_user` accounts are broken on purpose.
 | Unexpected failures | 0 |
 | Execution time | about 1 minute |
 
-
-
-The 3 expected failures are the documented defects in `bug-reports/`.
-
-### Report screenshots
-
-- [Pytest report overview — inventory failure](screenshots/pytest-report-overview-inventory-failure.png)
-- [Duplicate product images failure](screenshots/pytest-report-duplicate-product-images-failure.png)
-- [Checkout and login performance failures](screenshots/pytest-report-checkout-and-login-performance-failures.png)
-- [Passing tests and performance failure](screenshots/pytest-report-passing-tests-and-performance-failure.png)
+![Test report summary](screenshots/test-report-summary.png)
 
