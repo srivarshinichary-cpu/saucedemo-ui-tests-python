@@ -76,7 +76,7 @@ The `problem_user` and `performance_glitch_user` accounts are broken on purpose.
 | Unexpected failures | 0 |
 | Execution time | about 1 minute |
 
-![Test report summary](screenshots/test-report-summary.png)
+
 
 The 3 expected failures are the documented defects in `bug-reports/`.
 
