@@ -7,6 +7,7 @@ See bug-reports/ for the write-ups.
 import time
 
 import pytest
+from playwright.sync_api import expect
 
 from config import BASE_URL, PASSWORD, PERFORMANCE_USER, PROBLEM_USER
 from pages.checkout_page import CheckoutPage
@@ -22,7 +23,9 @@ def test_problem_user_products_have_distinct_images(page):
     login.open_login()
     login.login(PROBLEM_USER, PASSWORD)
     inventory = InventoryPage(page)
+    expect(inventory.images).to_have_count(6)  # wait for the page; never compare an empty list
     sources = [img.get_attribute("src") for img in inventory.images.all()]
+    assert len(sources) == 6
     assert len(set(sources)) == len(sources)
 
 
@@ -44,7 +47,10 @@ def test_problem_user_can_type_last_name(page):
     assert checkout.first_name.input_value() == ""
 
 
-@pytest.mark.xfail(reason="BUG-003: performance_glitch_user login is slow", strict=False)
+@pytest.mark.xfail(
+    reason="BUG-003: performance_glitch_user login is slow (environment-dependent, see bug report)",
+    strict=False,
+)
 def test_performance_user_login_under_two_seconds(page):
     login = LoginPage(page)
     login.open_login()

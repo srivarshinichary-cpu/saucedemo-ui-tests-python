@@ -1,4 +1,7 @@
+import re
+
 import pytest
+from playwright.sync_api import expect
 
 BACKPACK = "Sauce Labs Backpack"
 
@@ -16,15 +19,16 @@ def at_checkout_form(inventory, cart_page):
 def test_end_to_end_checkout(page, at_checkout_form, checkout_page):
     checkout_page.fill_info("Ravi", "Kumar", "500001")
     checkout_page.continue_()
-    assert page.url.endswith("/checkout-step-two.html")
+    expect(page).to_have_url(re.compile(r"/checkout-step-two\.html$"))
     checkout_page.finish()
-    assert checkout_page.complete_header.inner_text() == "Thank you for your order!"
+    expect(checkout_page.complete_header).to_have_text("Thank you for your order!")
 
 
 @pytest.mark.regression
 def test_order_total_equals_subtotal_plus_tax(at_checkout_form, checkout_page):
     checkout_page.fill_info("Ravi", "Kumar", "500001")
     checkout_page.continue_()
+    expect(checkout_page.total_label).to_be_visible()
     assert checkout_page.total() == pytest.approx(
         checkout_page.subtotal() + checkout_page.tax(), abs=0.01
     )
@@ -44,10 +48,10 @@ def test_order_total_equals_subtotal_plus_tax(at_checkout_form, checkout_page):
 def test_checkout_form_validation(at_checkout_form, checkout_page, first, last, postal, expected_error):
     checkout_page.fill_info(first, last, postal)
     checkout_page.continue_()
-    assert expected_error in checkout_page.error_text()
+    expect(checkout_page.error).to_contain_text(expected_error)
 
 
 @pytest.mark.regression
 def test_cancel_returns_to_cart(page, at_checkout_form, checkout_page):
     checkout_page.cancel_button.click()
-    assert page.url.endswith("/cart.html")
+    expect(page).to_have_url(re.compile(r"/cart\.html$"))

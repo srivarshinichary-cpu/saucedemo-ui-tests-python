@@ -1,18 +1,17 @@
 import time
 
 import pytest
+from playwright.sync_api import expect
 
 from config import BASE_URL, LOCKED_USER, PASSWORD, STANDARD_USER
-from pages.inventory_page import InventoryPage
 
 
 @pytest.mark.smoke
 @pytest.mark.regression
-def test_valid_login_opens_inventory(page, login_page):
+def test_valid_login_opens_inventory(page, login_page, inventory_page):
     login_page.login(STANDARD_USER, PASSWORD)
-    inventory = InventoryPage(page)
-    assert page.url == f"{BASE_URL}/inventory.html"
-    assert inventory.title.inner_text() == "Products"
+    expect(page).to_have_url(f"{BASE_URL}/inventory.html")
+    expect(inventory_page.title).to_have_text("Products")
 
 
 @pytest.mark.negative
@@ -30,29 +29,29 @@ def test_valid_login_opens_inventory(page, login_page):
 )
 def test_invalid_login_shows_error(login_page, username, password, expected_error):
     login_page.login(username, password)
-    assert expected_error in login_page.error_text()
+    expect(login_page.error).to_contain_text(expected_error)
 
 
 @pytest.mark.negative
 @pytest.mark.regression
 def test_locked_out_user_cannot_login(login_page):
     login_page.login(LOCKED_USER, PASSWORD)
-    assert "locked out" in login_page.error_text()
+    expect(login_page.error).to_contain_text("locked out")
 
 
 @pytest.mark.negative
 @pytest.mark.regression
 def test_inventory_requires_login(page, login_page):
     login_page.open("/inventory.html")
-    assert "logged in" in login_page.error_text()
-    assert page.url.rstrip("/") == BASE_URL
+    expect(login_page.error).to_contain_text("logged in")
+    expect(page).to_have_url(f"{BASE_URL}/")
 
 
 @pytest.mark.regression
 def test_logout_returns_to_login(page, inventory, login_page):
     inventory.logout()
-    assert page.url.rstrip("/") == BASE_URL
-    assert login_page.login_button.is_visible()
+    expect(page).to_have_url(f"{BASE_URL}/")
+    expect(login_page.login_button).to_be_visible()
 
 
 @pytest.mark.regression

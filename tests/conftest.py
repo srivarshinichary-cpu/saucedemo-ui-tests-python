@@ -20,6 +20,11 @@ def login_page(page) -> LoginPage:
 
 
 @pytest.fixture
+def inventory_page(page) -> InventoryPage:
+    return InventoryPage(page)
+
+
+@pytest.fixture
 def inventory(page, login_page) -> InventoryPage:
     """Logged in as the standard user and sitting on the inventory page."""
     login_page.login(STANDARD_USER, PASSWORD)
