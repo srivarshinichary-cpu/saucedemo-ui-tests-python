@@ -1,4 +1,5 @@
 # SauceDemo Web UI Test Automation (Python + Playwright)
+![UI tests](https://github.com/srivarshinichary-cpu/saucedemo-ui-tests-python/actions/workflows/ui-tests.yml/badge.svg)
 
 UI test automation framework for the [SauceDemo](https://www.saucedemo.com) practice e-commerce site, built with **Python, Playwright, pytest and GitHub Actions** using the Page Object Model.
 
